@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小红书分享文案生成器</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Microsoft YaHei", sans-serif; background: #f5f5f5; color: #333; padding: 20px; }
+.container { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 20px; margin-bottom: 16px; color: #ff2442; }
+.card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+textarea { width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 12px; font-size: 14px; resize: vertical; font-family: inherit; }
+textarea:focus { outline: none; border-color: #ff2442; }
+.btn-row { display: flex; gap: 12px; margin-top: 12px; }
+button { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; transition: opacity .2s; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+.btn-primary { background: #ff2442; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #e61f3c; }
+.btn-secondary { background: #eee; color: #333; }
+.btn-secondary:hover:not(:disabled) { background: #ddd; }
+#result { min-height: 160px; white-space: pre-wrap; line-height: 1.6; }
+#status { font-size: 13px; color: #888; margin-top: 8px; min-height: 18px; }
+.error { color: #ff2442; }
+.note-info { font-size: 13px; color: #666; margin-top: 12px; padding: 12px; background: #fafafa; border-radius: 8px; white-space: pre-wrap; display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>小红书分享文案生成器</h1>
+
+  <div class="card">
+    <label for="share">分享链接 / 文本</label>
+    <textarea id="share" rows="4" placeholder="粘贴小红书分享文本或链接，例如：&#10;67 【标题】 😆 JD5U1VyvHbeWo1v 😆 https://www.xiaohongshu.com/discovery/item/xxx?xsec_token=..."></textarea>
+    <div class="btn-row">
+      <button class="btn-primary" id="genBtn" onclick="generate()">生成分享文案</button>
+      <button class="btn-secondary" id="clearBtn" onclick="clearAll()">清空</button>
+      <button class="btn-secondary" id="copyBtn" onclick="copyResult()" disabled>复制结果</button>
+    </div>
+    <div id="status"></div>
+    <div id="noteInfo" class="note-info"></div>
+  </div>
+
+  <div class="card">
+    <label for="result">生成的文案</label>
+    <textarea id="result" rows="10" placeholder="生成的分享文案会显示在这里..."></textarea>
+  </div>
+</div>
+
+<script>
+async function generate() {
+  const share = document.getElementById('share').value.trim();
+  const status = document.getElementById('status');
+  const result = document.getElementById('result');
+  const noteInfo = document.getElementById('noteInfo');
+  const genBtn = document.getElementById('genBtn');
+  const copyBtn = document.getElementById('copyBtn');
+
+  if (!share) { setStatus('请输入分享链接', true); return; }
+
+  genBtn.disabled = true;
+  copyBtn.disabled = true;
+  setStatus('正在生成...');
+  result.value = '';
+  noteInfo.style.display = 'none';
+
+  try {
+    const resp = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ share_text: share })
+    });
+    const data = await resp.json();
+    if (!resp.ok || data.error) {
+      throw new Error(data.error || '请求失败 (' + resp.status + ')');
+    }
+    result.value = data.copy;
+    if (data.note) { noteInfo.textContent = data.note; noteInfo.style.display = 'block'; }
+    setStatus('完成');
+    copyBtn.disabled = false;
+  } catch (e) {
+    setStatus(e.message, true);
+  } finally {
+    genBtn.disabled = false;
+  }
+}
+
+function clearAll() {
+  document.getElementById('share').value = '';
+  document.getElementById('result').value = '';
+  document.getElementById('noteInfo').style.display = 'none';
+  setStatus('');
+  document.getElementById('copyBtn').disabled = true;
+}
+
+function copyResult() {
+  const text = document.getElementById('result').value;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => setStatus('已复制到剪贴板'));
+}
+
+function setStatus(msg, isErr) {
+  const s = document.getElementById('status');
+  s.textContent = msg;
+  s.className = isErr ? 'error' : '';
+}
+</script>
+</body>
+</html>

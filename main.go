@@ -6,11 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/app"
-
 	"material/config"
-	"material/ui"
+	"material/web"
 )
 
 func main() {
@@ -20,16 +17,12 @@ func main() {
 		log.Fatalf("load config: %v", err)
 	}
 
-	// 创建 Fyne 应用
-	a := app.New()
-	w := a.NewWindow("小红书分享文案生成器")
-	w.Resize(fyne.NewSize(640, 600))
-
-	gui := ui.NewApp(cfg)
-	w.SetContent(gui.Render(w))
-	w.SetMaster()
-
-	w.ShowAndRun()
+	// 启动 HTTP server
+	addr := ":8080"
+	fmt.Printf("服务已启动，请在浏览器打开 http://localhost%s\n", addr)
+	if err := web.Serve(addr, cfg); err != nil {
+		log.Fatalf("server error: %v", err)
+	}
 }
 
 // loadConfig 优先从配置文件加载；文件不存在时回退到环境变量。
