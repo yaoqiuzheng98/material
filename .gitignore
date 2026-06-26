@@ -1,0 +1,26 @@
+# 配置文件（含 API Key / Cookie 等敏感信息，禁止提交）
+config.toml
+
+# 构建产物
+/material
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go 工作区
+go.work
+go.work.sum
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 操作系统
+.DS_Store
+Thumbs.db
