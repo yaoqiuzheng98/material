@@ -1,17 +1,6 @@
 # Material 配置文件
-# 复制为 config.toml 后填入自己的值。请勿提交真实 API Key / Cookie 到 git。
-
-[xhs]
-# 浏览器登录后的 Cookie（F12 复制）
-cookie = ""
-# 以下签名头由小红书前端 JS 生成且会过期，需要定期更新或自行实现签名逻辑
-x_s = ""
-x_s_common = ""
-x_t = ""
-x_b3_traceid = ""
-x_rap_param = ""
-x_xray_traceid = ""
-xy_direction = ""
+# 复制为 config.toml 后填入自己的值。请勿提交真实 API Key 到 git。
+# 小红书的签名头 / Cookie 写死在 config/config.go 的 DefaultXHSConfig() 中，不在此文件配置。
 
 [llm]
 # DeepSeek 官方 API（OpenAI 兼容协议）
